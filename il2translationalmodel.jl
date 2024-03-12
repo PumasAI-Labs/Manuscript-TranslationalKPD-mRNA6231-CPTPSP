@@ -5,7 +5,7 @@ using DataFramesMeta
 using AlgebraOfGraphics
 using CairoMakie
 
-il2data = CSV.read("./data/derived/il2finaldataset.csv",
+il2data = CSV.read("./data/il2finaldataset.csv",
     DataFrame, missingstring=["NA", "."])
 
 il2data = @chain il2data begin
@@ -231,7 +231,7 @@ il2tregmodel = @model begin
 end
 
 @info "treg data"
-tregdata = CSV.read("./data/derived/tregfinaldataset.csv",
+tregdata = CSV.read("./data/tregfinaldataset.csv",
     DataFrame, missingstring=["NA", "."])
 @rsubset! tregdata :id != 2002
 tregpop = read_pumas(tregdata,
@@ -448,7 +448,7 @@ end
 ### il2
 
 #observed data 
-obs = CSV.read("data/derived/mRNA6231-P101_PD HSA IL-2_20082021.csv", DataFrame)
+obs = CSV.read("data/mRNA6231-P101_PD HSA IL-2_20082021.csv", DataFrame)
 @rsubset! obs :DV > 0
 @rtransform! obs :Day = round((:Time / 24.0), digits=2)
 #% > % filter(DV > 0)

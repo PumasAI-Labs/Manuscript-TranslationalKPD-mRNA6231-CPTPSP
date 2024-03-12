@@ -1,0 +1,320 @@
+%
+% Default Template for Publish.jl LaTeX/PDF output. Expected to be compilable
+% with Tectonic/XeLaTeX without any `--shell-escape` usage.
+%
+\documentclass{article}
+
+%
+% Required Package Imports.
+%
+
+\usepackage{fontspec}
+\usepackage{microtype}
+\usepackage{unicode-math}
+
+\usepackage[dvipsnames]{xcolor} % For admonitions.
+\definecolor{linkcolor}{HTML}{0969da}
+\usepackage{hyperref} % Internal links to anywhere.
+\hypersetup{
+    colorlinks,
+    linkcolor={linkcolor},
+    citecolor={linkcolor},
+    urlcolor={linkcolor}
+}
+\usepackage{tcolorbox} % For admonitions.
+\usepackage{longtable} % Multi-page tables.
+\usepackage{threeparttable} % for SummaryTables
+\usepackage{multirow} % for SummaryTables
+\usepackage{booktabs} % for SummaryTables
+\usepackage{tocloft} % Additional table-of types.
+\usepackage[export]{adjustbox} % For resizing images.
+\usepackage{subcaption}
+\usepackage{xurl} % Line-breaks in URLs.
+\usepackage{textcomp}
+\usepackage{listings} % Formatted code blocks.
+\usepackage{pdflscape} % Landscape orientation for Table objects.
+\usepackage[a4paper, total={6in, 8in}]{geometry}
+\usepackage{import}
+\usepackage{authblk}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{tikz}
+% \usepackage[paper=portrait,pagesize]{typearea} % for landscape pages https://tex.stackexchange.com/a/430619, but this currently cuts off tables and has a small type area
+
+\newenvironment{allintypewriter}{\ttfamily}{\par}
+
+%%% biblatex is loaded later on. %%%
+
+
+%
+% Listings settings.
+%
+
+\lstset{
+    breaklines=true,
+    postbreak=\raisebox{0ex}[0ex][0ex]{\ensuremath{\color{red}\hookrightarrow\space}},
+    frame=single,
+    xleftmargin=\parindent,
+    upquote=true,
+    basicstyle=\footnotesize\ttfamily,
+}
+
+%
+% Font Features.
+%
+
+\defaultfontfeatures{Scale=MatchLowercase}
+\defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+
+\setmainfont{DejaVuSerif}[
+  Path=fonts/DejaVu/,
+  BoldFont=*-Bold,
+  ItalicFont=*-Italic,
+]
+\setsansfont{DejaVuSans}[
+  Path=fonts/DejaVu/,
+  BoldFont=*-Bold,
+  ItalicFont=*-Oblique,
+]
+\setmonofont{JuliaMono}[
+  Path=fonts/JuliaMono/,
+  UprightFont=*-Regular,
+  BoldFont=*-Bold,
+]
+
+
+%
+% Front-matter Variables.
+%
+
+% Add additional commands for title page.
+\makeatletter
+\providecommand{\studyid}[1]{
+  \apptocmd{\@title}{\par \vspace{0.5cm} {\large \textsc{Study ID:} #1 \par}}{}{}
+}
+\providecommand{\sponsor}[1]{
+  \apptocmd{\@title}{\par \vspace{0.5cm} {\large \textsc{Sponsor:} #1 \par}}{}{}
+}
+\makeatother
+
+\title{{\huge HSM-IL2 Manuscript Plots}}
+
+
+
+\author[ \hspace{-1ex}]{}
+
+
+
+\newcommand{\sectionbreak}{\clearpage}
+
+
+%
+% Header and footer settings.
+%
+
+\pagestyle{fancy}
+
+% Clear defaults.
+\fancyhead{}
+\fancyfoot{}
+
+\fancyhead[C]{}
+\fancyhead[RO,LE]{}
+\fancyfoot[C]{}
+\fancyfoot[RO,LE]{\thepage}
+
+% Force title and toc to use this header/footer style.
+\fancypagestyle{plain}{}
+
+
+%
+% Table and figure counters.
+%
+% At the end of the document we check whether the counters for these two
+% objects have been incremented. If they have, then we update the globals so
+% that on the next run we include the LoF and LoT. Long tables need to be
+% checked as well since they do not get manually wrapped in table environments.
+%
+
+\newif\iffigures
+\newif\iftables
+
+\makeatletter
+\let\OLDfigure\figure
+\def\figure {\figures@in@document\OLDfigure }
+\let\OLDtable\table
+\def\table {\tables@in@document\OLDtable }
+\let\OLDlongtable\longtable
+\def\longtable {\longtables@in@document\OLDlongtable }
+
+\def\figures@in@document {%
+    \immediate\write\@mainaux {\global\string\figurestrue}%
+    \global\let\figures@in@document\empty
+}
+
+\def\tables@in@document {%
+    \immediate\write\@mainaux {\global\string\tablestrue}%
+    \global\let\tables@in@document\empty
+}
+
+\def\longtables@in@document {%
+    \immediate\write\@mainaux {\global\string\tablestrue}%
+    \global\let\longtables@in@document\empty
+}
+\makeatother
+
+
+\begin{document}
+
+%
+% Front-matter display.
+%
+
+\maketitle
+
+\begin{tikzpicture}[remember picture,overlay]
+\node[anchor=south,yshift=50pt]%
+    at (current page.south)
+    {\includegraphics[width=90pt]{/home/jrun/data/.juliapumas2.5.1/scratchspaces/8b92943f-4587-47ba-ba47-ab67d84475e1/3984cdf6ebb5ac60873af31dd07ecf3c9fcbf973_JeY5zB2yPUs/pumas-logo.png}};
+\end{tikzpicture}
+
+\thispagestyle{empty}
+\clearpage
+
+% # Contents Tables
+%
+% Document outline, list of figures, and list of tables. If there are not
+% tables or figures to list, then we don't display those lists.
+
+\tableofcontents
+
+\iffigures
+   \addcontentsline{toc}{section}{List of Figures}
+   \listoffigures
+\fi
+
+\iftables
+   \addcontentsline{toc}{section}{List of Tables}
+   \listoftables
+\fi
+
+%
+% Beginning of user content.
+%
+
+\begin{figure}[p]
+\adjustimage{max height=\textheight,max width=\linewidth,center}{EdTlPetZA06.pdf}
+\caption{(1 of 16).}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[p]
+\adjustimage{max height=\textheight,max width=\linewidth,center}{3iRh2HxxRAg.pdf}
+\caption{(2 of 16).}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[p]
+\adjustimage{max height=\textheight,max width=\linewidth,center}{4tJXcKAbG1q.pdf}
+\caption{(3 of 16).}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[p]
+\adjustimage{max height=\textheight,max width=\linewidth,center}{5O5nEtqqffo.pdf}
+\caption{(4 of 16).}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[p]
+\adjustimage{max height=\textheight,max width=\linewidth,center}{1aWJsukTvMP.pdf}
+\caption{(5 of 16).}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[p]
+\adjustimage{max height=\textheight,max width=\linewidth,center}{EvQA6GFiebR.pdf}
+\caption{(6 of 16).}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[p]
+\adjustimage{max height=\textheight,max width=\linewidth,center}{G1Op1snw8r9.pdf}
+\caption{(7 of 16).}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[p]
+\adjustimage{max height=\textheight,max width=\linewidth,center}{DHaA7YfLdEn.pdf}
+\caption{(8 of 16).}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[p]
+\adjustimage{max height=\textheight,max width=\linewidth,center}{FYfNkeHx7AP.pdf}
+\caption{(9 of 16).}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[p]
+\adjustimage{max height=\textheight,max width=\linewidth,center}{7RdXRbZmi1B.pdf}
+\caption{(10 of 16).}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[p]
+\adjustimage{max height=\textheight,max width=\linewidth,center}{5r05KnRVYDb.pdf}
+\caption{(11 of 16).}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[p]
+\adjustimage{max height=\textheight,max width=\linewidth,center}{750s3HHaeFC.pdf}
+\caption{(12 of 16).}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[p]
+\adjustimage{max height=\textheight,max width=\linewidth,center}{CxIyv5Ui2SP.pdf}
+\caption{(13 of 16).}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[p]
+\adjustimage{max height=\textheight,max width=\linewidth,center}{CCIJjEboTSS.pdf}
+\caption{(14 of 16).}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[p]
+\adjustimage{max height=\textheight,max width=\linewidth,center}{4OHWJ0g18K9.pdf}
+\caption{(15 of 16).}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[p]
+\adjustimage{max height=\textheight,max width=\linewidth,center}{K4HBdrAcIWx.pdf}
+\caption{(16 of 16).}
+\end{figure}
+
+\clearpage
+
+
+
+
+\end{document}

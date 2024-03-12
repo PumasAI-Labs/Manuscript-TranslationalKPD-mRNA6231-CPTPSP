@@ -13,6 +13,8 @@ il2data = @chain il2data begin
     @rtransform :dv = :evid == 0 ? :dv : missing
 end
 
+utimes = unique(il2data.time)
+
 il2pop = read_pumas(il2data,
     observations=[:dv],
     covariates=[:dosegroup])
@@ -72,17 +74,17 @@ end
 
 ll = loglikelihood(il2model,
     il2pop,
-    init_params(il2model), Pumas.FOCE())
+    init_params(il2model), FOCE())
 
 fi = findinfluential(il2model,
     il2pop,
-    init_params(il2model), Pumas.FOCE(), k = length(il2pop))
+    init_params(il2model), FOCE())
 DataFrame(fi)
 
 @info "Fit using maximum loglikelihood"
 il2fit = fit(il2model,
     il2pop,
-    init_params(il2model), Pumas.FOCE())
+    init_params(il2model), FOCE())
 #
 @info "Inference"
 il2infer = infer(il2fit)
@@ -106,24 +108,25 @@ fig1
 vpc_il2 = vpc(il2fit,
     prediction_correction=true,
     ensemblealg=EnsembleThreads(),
-    bandwidth=60,
-    obstimes=0.1:28:1600)
+    bandwidth=60.0, nnodes = 15)
 fig2 = vpc_plot(vpc_il2,
     observations=true,
     markercolor=:grey,
     observed_linewidth=3,
-    # legend=true,
+    figurelegend=(position=:t, 
+                  alignmode=Outside(), 
+                  orientation=:horizontal, 
+                  nbanks=3),
     markersize=12,
     axis=(yscale=Makie.pseudolog10,
         xticks=0:168:1800,
-        yticks=vcat(0:20:100, 200:100:600),
+        yticks=vcat(0:20:100, 200:200:600),
         ylabel="IL2-HSM",
         xlabel="Time (hours)",
         spinewidth=4,
         rightspinevisible=false,
         topspinevisible=false),
     figure=(resolution=(1800, 1400), fontsize=40))
-figurelegend(fig2; position=:t, alignmode=Outside(), orientation=:horizontal)
 fig2
 
 # individual predictions
@@ -133,6 +136,9 @@ indpreds_il2 = [predict(il2fit.model,
     il2fit.param;
     obstimes=0:7:maximum(il2fit.data[i].time)) for i in 1:length(il2fit.data)]
 fig3_indpreds_il2_sf = subject_fits(indpreds_il2,
+    figurelegend = (position=:t, 
+                    alignmode=Outside(), 
+                    orientation=:horizontal),
     paginate=true,
     separate=true,
     limit=9,
@@ -146,7 +152,6 @@ fig3_indpreds_il2_sf = subject_fits(indpreds_il2,
         fontsize=28,),
     axis=(xticks=0:168:1600, xticklabelrotation=π / 2,
         ylabel="HSA-IL2m", xlabel="Time (hours)"))
-[figurelegend(fig3_indpreds_il2_sf[i]; position=:t, alignmode=Outside(), orientation=:horizontal) for i in 1:length(fig3_indpreds_il2_sf)]
 fig3_indpreds_il2_sf[4]
 
 #### Treg model
@@ -244,22 +249,20 @@ tregpop = read_pumas(tregdata,
 
 ll = loglikelihood(il2tregmodel,
     tregpop,
-    init_params(il2tregmodel), Pumas.FOCE())
+    init_params(il2tregmodel), FOCE())
 
 @info "Fit using maximum loglikelihood"
 il2tregfit = @time fit(il2tregmodel,
     tregpop,
-    init_params(il2tregmodel), Pumas.FOCE(),
+    init_params(il2tregmodel), FOCE(),
     constantcoef=(tvV=171.5577983523755,
         tvCl=12.865014260196519,
         tvKa=0.07496438054293122,
         tvslope=4570.288914609663,
         ecl=0.3075096768027959,
         tvC50=0.13122923353002033,
-        Ωil2=[0.2640513178907819 0.024990985611595563; 0.024990985611595563 0.05249457763745266],
-    ),
-    # diffeq_options=(alg=Rosenbrock23(),),
-    optimize_fn=Pumas.DefaultOptimizeFN(extended_trace=true,))
+        Ωil2=[0.2640513178907819 0.024990985611595563; 0.024990985611595563 0.05249457763745266])
+)
 #
 @info "Inference"
 il2treginfer = infer(il2tregfit, Pumas.Bootstrap(;samples=200))
@@ -272,6 +275,7 @@ il2treginspect = inspect(il2tregfit)
 #gof plot
 
 fig4 = goodness_of_fit(il2treginspect,
+    figurelegend = (position=:t, alignmode=Outside(), orientation=:horizontal),
     markercolor=:grey,
     markersize=5,
     ols=false,
@@ -279,21 +283,19 @@ fig4 = goodness_of_fit(il2treginspect,
         spinewidth=4,
         rightspinevisible=false,
         topspinevisible=false))
-figurelegend(fig4; position=:t, alignmode=Outside(), orientation=:horizontal)
 fig4
 
 ## pcvpc
 vpc_treg = vpc(il2tregfit,
     prediction_correction=true,
     ensemblealg=EnsembleThreads(),
-    bandwidth=50,
-    obstimes=0:28:1800)
+    bandwidth=50.0)
 fig5 = vpc_plot(vpc_treg,
     observations=true,
     markercolor=:grey,
     markersize=12,
     observed_linewidth=3,
-    #legend=true,
+    figurelegend = (position=:t, alignmode=Outside(), orientation=:horizontal),
     axis=(yscale=Makie.pseudolog10,
         xticks=0:168:1800,
         yticks=0:10:70,
@@ -304,7 +306,7 @@ fig5 = vpc_plot(vpc_treg,
         topspinevisible=false
     ),
     figure=(resolution=(1800, 1400), fontsize=40))
-figurelegend(fig5; position=:t, alignmode=Outside(), orientation=:horizontal)
+
 fig5
 
 
@@ -324,12 +326,12 @@ fig6_indpreds_treg_sf = subject_fits(indpreds_treg,
     pred_linewidth=6,
     markersize=16,
     facet=(combinelabels=true,),
+    figurelegend = (position=:t, alignmode=Outside(), orientation=:horizontal),
     figure=(resolution=(1400, 1000),
         fontsize=32,),
     axis=(xticks=0:168:1600, xticklabelrotation=π / 2,
         ylabel="%FOXP3+ of CD4+ T cells",
         xlabel="Time (hours)",))
-[figurelegend(fig6_indpreds_treg_sf[i]; position=:t, alignmode=Outside(), orientation=:horizontal) for i in 1:length(fig6_indpreds_treg_sf)]
 fig6_indpreds_treg_sf[4]
 
 ##
@@ -437,9 +439,9 @@ vpc_data = @chain simdf begin
         :p05treg = quantile(:itreg, 0.05)
         :p95treg = quantile(:itreg, 0.95)
 
-        :meancIL2 = mean(:cIL2)
-        :p05cIL2 = quantile(:cIL2, 0.05)
-        :p95cIL2 = quantile(:cIL2, 0.95)
+        :meancIL2 = mean(:IL2)
+        :p05cIL2 = quantile(:IL2, 0.05)
+        :p95cIL2 = quantile(:IL2, 0.95)
     end
     @rtransform :Day = round((:time / 24.0), digits=2)
 end
@@ -473,7 +475,7 @@ fig7
 ## treg
 
 #observed data 
-obs = CSV.read("data/derived/mRNA6231-P101_PD IPT_26082021.csv", DataFrame)
+obs = CSV.read("data/mRNA6231-P101_PD IPT_26082021.csv", DataFrame)
 @rsubset! obs :Units == "%"
 @rsubset! obs :Analyte == "Treg (FoxP3+CD25+, CD4+)"
 @rtransform! obs :Day = :TAFD

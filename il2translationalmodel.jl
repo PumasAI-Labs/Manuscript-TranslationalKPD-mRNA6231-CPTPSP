@@ -449,13 +449,6 @@ end
 
 ### il2
 
-#observed data 
-obs = CSV.read("data/mRNA6231-P101_PD HSA IL-2_20082021.csv", DataFrame)
-@rsubset! obs :DV > 0
-@rtransform! obs :Day = round((:Time / 24.0), digits=2)
-#% > % filter(DV > 0)
-
-
 fig7 = Figure(resolution=(1200, 800), fontsize=34)
 
 ax7 = Axis(fig7, xlabel="Time (days)", ylabel="HSM-IL2m", xticks=0:7:70,
@@ -466,20 +459,12 @@ lines!(vpc_data.Day, vpc_data.meancIL2, color=:black, linestyle=:solid, linewidt
 lines!(vpc_data.Day, vpc_data.p95cIL2, color=(:maroon, 0.4), linestyle=:dash, linewidth=4, label="95th")
 
 band!(vpc_data.Day, vpc_data.p05cIL2, vpc_data.p95cIL2; color=(:green, 0.2))
-scatter!(obs.Day, obs.DV, color=(:blue, 0.5), markersize=18)
 fig7[1, 1] = ax7
 axislegend()
 
 fig7
 
 ## treg
-
-#observed data 
-obs = CSV.read("data/mRNA6231-P101_PD IPT_26082021.csv", DataFrame)
-@rsubset! obs :Units == "%"
-@rsubset! obs :Analyte == "Treg (FoxP3+CD25+, CD4+)"
-@rtransform! obs :Day = :TAFD
-#% > % filter(DV > 0)
 
 fig8 = Figure(resolution=(1200, 800), fontsize=34)
 
@@ -491,7 +476,6 @@ lines!(vpc_data.Day, vpc_data.meantreg, color=:black, linestyle=:solid, linewidt
 lines!(vpc_data.Day, vpc_data.p95treg, color=(:maroon, 0.4), linestyle=:dash, linewidth=4, label="95th")
 
 band!(vpc_data.Day, vpc_data.p05treg, vpc_data.p95treg; color=(:green, 0.2))
-scatter!(obs.Day, obs.Result, color=(:blue, 0.5), markersize=18)
 fig8[1, 1] = ax8
 axislegend()
 
